@@ -114,7 +114,7 @@ export default {
         const messages = [
           {
             role: 'user',
-            content: `${this.prompt} ${html}`,
+            content: `${this.prompt} Provide suggestions for improvement and code examples. ${html}`,
           },
         ];
 
@@ -131,49 +131,60 @@ export default {
         let part_size = 2;
         const str_len = html.length;
         let allPartsValid = false;
+        const combinedResponse = [];
 
         while (!allPartsValid) {
-            const tempParts = []; 
+            const tempParts = [];
             allPartsValid = true;
-
             const sizePerPart = Math.ceil(str_len / part_size);
 
-            // Split the HTML string into parts
             for (let i = 0; i < part_size; i++) {
                 const start = i * sizePerPart;
-                const end = Math.min(start + sizePerPart, str_len); 
+                const end = Math.min(start + sizePerPart, str_len);
                 const part = html.slice(start, end);
                 tempParts.push(part);
             }
 
-            // Check if all parts are valid
             for (let i = 0; i < tempParts.length; i++) {
                 if (!isWithinTokenLimit(tempParts[i], this.tokenlimit)) {
                     allPartsValid = false;
-                    part_size++; 
+                    part_size++;
                     break;
                 }
             }
             parts = tempParts;
         }
+
         const options = {
             model: 'gpt-4',
             temperature: 0.4,
         };
 
+       
         // Iterate over the parts and send them to the API
-        for (let i = 0; i < part_size; i++) {
+        for (let i = 0; i < parts.length; i++) {
+            const partPrompt = i === 0 ? 
+                `This is part ${i + 1} of the HTML. ${this.prompt}. Provide suggestions for improvement and code examples. More parts will follow.` : 
+                i === parts.length - 1 ? 
+                    `This is the last part of the HTML. Combine this with previous parts. Provide final improvement suggestions.` :
+                    `This is part ${i + 1} of the HTML. Continue examining the code. More parts will follow.`;
+
             const messages = [
                 {
                     role: 'user',
-                    content: ` ${this.prompt} Notice that this is only a part of html page.Some tags might be enclosed ,so don't mention this in response. ${parts[i]}`,
+                    content: `${partPrompt} ${parts[i]}`,
                 },
             ];
 
             const choices = await api.createChatCompletion(messages, options);
-            this.responses.push(choices[0].message.content);
+            combinedResponse.push(choices[0].message.content);
         }
+
+        const finalResponse = combinedResponse.join('\n');
+        this.responses.push(finalResponse);
+
     }
+
 
 
 
