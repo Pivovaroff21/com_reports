@@ -120,7 +120,7 @@ export default {
 
         const options = {
           model: 'gpt-4',
-          temperature: 0.4,
+          temperature: 0.8,
         };
         const choices = await api.createChatCompletion(messages, options);
         this.responses.push(choices[0].message.content); 
@@ -164,7 +164,7 @@ export default {
         // Iterate over the parts and send them to the API
         for (let i = 0; i < parts.length; i++) {
             const partPrompt = i === 0 ? 
-                `This is part ${i + 1} of the HTML. ${this.prompt}. Provide suggestions for improvement and code examples. More parts will follow.` : 
+                `This is part ${i + 1} of the HTML. ${this.prompt}.  More parts will follow.` : 
                 i === parts.length - 1 ? 
                     `This is the last part of the HTML. Combine this with previous parts. Provide final improvement suggestions.` :
                     `This is part ${i + 1} of the HTML. Continue examining the code. More parts will follow.`;

@@ -39,27 +39,27 @@ export default {
       reports: {
         'html': {
           title: 'HTML Problems',
-          prompt: 'check problem in code.'
+          prompt: 'Check code for problems in HTML and give improvements and code examples.'
         },
         'accessibility': {
           title: 'Accessibility Issues',
-          prompt: 'Check accessibility problem in code.'
+          prompt: 'Analyze the code for accessibility problems, such as missing alt attributes, improper use of headings, and other factors affecting users with disabilities. Provide suggestions for improvement and code examples.'
         },
         'seo': {
           title: 'SEO Problems',
-          prompt: 'Check problem in seo code.'
+          prompt: 'Review the code for SEO-related issues like missing or duplicate title tags, meta descriptions, and header tags. Provide recommendations for improvement and code examples.'
         },
         'cybersecurity': {
           title: 'Cybersecurity Concerns',
-          prompt: 'Check problem in cyber security.'
+          prompt: 'Examine the code for potential cybersecurity vulnerabilities, including improperly handled user inputs and missing security headers. Suggest enhancements to improve security and code examples.'
         },
         'eat': {
           title: 'E-A-T Concerns',
-          prompt: 'Check problem in Expertise, Authoritativeness, and Trustworthiness (E-A-T) factors.'
+          prompt: 'Evaluate the code for Expertise, Authoritativeness, and Trustworthiness (E-A-T) factors that might affect credibility and trust in the website. Provide suggestions for improvement and code examples.'
         },
         'ux': {
           title: 'UX Concerns',
-          prompt: 'Check UX problems. '
+          prompt: 'Examine the code for potential UX problems, including user input handling, intuitive navigation, and accessibility. Suggest improvements to enhance user experience and provide code examples.'
         }
       },
     };
