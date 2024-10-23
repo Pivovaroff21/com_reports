@@ -32,7 +32,6 @@ import axios from 'axios';
 import VueMarkdown from 'vue-markdown-render';
 import hljs from 'highlight.js' 
 import 'highlight.js/styles/github.css'; 
-import { isWithinTokenLimit} from 'gpt-tokenizer';
 export default {
   name: 'ReportComponent',
   components: {
@@ -73,11 +72,7 @@ export default {
   },
 
   methods: {
-    minifyHtml(html) {
-      return html
-        .replace(/\n/g, '')          
-        .replace(/\s{2,}/g, ' ')         
-    },
+
     async getReport() {
       this.error = '';
       this.isLoading = true;
@@ -91,20 +86,14 @@ export default {
 
       try{
         const response = await axios.get(this.pageUrl);
-        html = this.minifyHtml(response.data);
+        html = response.data;
 
       }catch(e){
         this.error = "Couldn't get html of your page. Only current site pages are available.";
         this.isLoading = false;
         return
       }
-
-      if(isWithinTokenLimit(html,this.tokenlimit) == false){
-        await this.splitReport(html);
-      }else{
-        await this.basicReport(html);
-      }
-
+      await this.basicReport(html);
       if(this.responses){
         this.isLoading = false;
       }
@@ -114,80 +103,17 @@ export default {
         const messages = [
           {
             role: 'user',
-            content: `${this.prompt} Provide suggestions for improvement and code examples. ${html}`,
+            content: `${this.prompt} ${html}`,
           },
         ];
 
         const options = {
-          model: 'gpt-4',
+          model: 'gpt-4-turbo',
           temperature: 0.8,
         };
         const choices = await api.createChatCompletion(messages, options);
         this.responses.push(choices[0].message.content); 
     },
-
-    async splitReport(html) {
-        let parts = [];
-        let part_size = 2;
-        const str_len = html.length;
-        let allPartsValid = false;
-        const combinedResponse = [];
-
-        while (!allPartsValid) {
-            const tempParts = [];
-            allPartsValid = true;
-            const sizePerPart = Math.ceil(str_len / part_size);
-
-            for (let i = 0; i < part_size; i++) {
-                const start = i * sizePerPart;
-                const end = Math.min(start + sizePerPart, str_len);
-                const part = html.slice(start, end);
-                tempParts.push(part);
-            }
-
-            for (let i = 0; i < tempParts.length; i++) {
-                if (!isWithinTokenLimit(tempParts[i], this.tokenlimit)) {
-                    allPartsValid = false;
-                    part_size++;
-                    break;
-                }
-            }
-            parts = tempParts;
-        }
-
-        const options = {
-            model: 'gpt-4',
-            temperature: 0.4,
-        };
-
-       
-        // Iterate over the parts and send them to the API
-        for (let i = 0; i < parts.length; i++) {
-            const partPrompt = i === 0 ? 
-                `This is part ${i + 1} of the HTML. ${this.prompt}.  More parts will follow.` : 
-                i === parts.length - 1 ? 
-                    `This is the last part of the HTML. Combine this with previous parts. Provide final improvement suggestions.` :
-                    `This is part ${i + 1} of the HTML. Continue examining the code. More parts will follow.`;
-
-            const messages = [
-                {
-                    role: 'user',
-                    content: `${partPrompt} ${parts[i]}`,
-                },
-            ];
-
-            const choices = await api.createChatCompletion(messages, options);
-            combinedResponse.push(choices[0].message.content);
-        }
-
-        const finalResponse = combinedResponse.join('\n');
-        this.responses.push(finalResponse);
-
-    }
-
-
-
-
   }
 };
 </script>

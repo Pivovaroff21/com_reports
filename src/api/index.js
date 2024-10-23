@@ -13,6 +13,7 @@ class Api {
 
   async createChatCompletion(messages, options = {}) {
     try {
+      console.log(this.gptInstance);
       const response = await this.gptInstance.post("/chat/completions", {
         model: options.model || "gpt-4",
         messages,
